@@ -23,11 +23,11 @@ const StudentProgress: React.FC = () => {
     const fetch = async () => {
       try {
         const [progressRes, analyticsRes] = await Promise.all([
-          progressAPI.getMyProgress(),
-          analyticsAPI.getMyAnalytics(),
+          progressAPI.getMyProgress().catch(() => null),
+          analyticsAPI.getMyAnalytics().catch(() => null),
         ]);
-        setProgress(progressRes.data.data.progress);
-        setAnalytics(analyticsRes.data.data.analytics);
+        if (progressRes) setProgress(progressRes.data.data.progress);
+        if (analyticsRes) setAnalytics(analyticsRes.data.data.analytics);
       } catch (err) {
         console.error(err);
       } finally {

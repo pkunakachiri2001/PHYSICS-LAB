@@ -23,10 +23,10 @@ const StudentDashboard: React.FC = () => {
     const fetchData = async () => {
       try {
         const [analyticsRes, experimentsRes] = await Promise.all([
-          analyticsAPI.getMyAnalytics(),
+          analyticsAPI.getMyAnalytics().catch(() => null),
           experimentsAPI.getAll({ limit: 4 }),
         ]);
-        setAnalytics(analyticsRes.data.data.analytics);
+        if (analyticsRes) setAnalytics(analyticsRes.data.data.analytics);
         setRecentExperiments(experimentsRes.data.data.experiments);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);

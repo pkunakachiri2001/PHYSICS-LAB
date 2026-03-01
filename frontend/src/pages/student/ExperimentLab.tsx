@@ -29,11 +29,11 @@ const ExperimentLab: React.FC = () => {
 
         const [experimentsRes, progressRes] = await Promise.all([
           experimentsAPI.getAll(params),
-          progressAPI.getMyProgress(),
+          progressAPI.getMyProgress().catch(() => null),
         ]);
         setExperiments(experimentsRes.data.data.experiments);
         setTotal(experimentsRes.data.data.pagination.total);
-        setProgress(progressRes.data.data.progress);
+        if (progressRes) setProgress(progressRes.data.data.progress);
       } catch (err) {
         console.error('Failed to fetch experiments:', err);
       } finally {
