@@ -1,0 +1,47 @@
+services:
+  # ── Backend API ────────────────────────────────────────────────
+  - type: web
+    name: smart-ar-physics-lab-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false        # Paste your MongoDB Atlas URI in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        value: https://smart-ar-physics-lab.onrender.com   # Must match frontend service URL below
+      - key: BCRYPT_SALT_ROUNDS
+        value: 12
+
+  # ── Frontend Static Site ───────────────────────────────────────
+  - type: web
+    name: smart-ar-physics-lab
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    staticPublishPath: build
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: SKIP_PREFLIGHT_CHECK
+        value: "true"
+      - key: REACT_APP_API_URL
+        value: https://smart-ar-physics-lab-api.onrender.com/api/v1
+      - key: REACT_APP_SOCKET_URL
+        value: https://smart-ar-physics-lab-api.onrender.com
