@@ -293,15 +293,19 @@ async function seed() {
     await User.deleteMany({ email: { $in: demoUsers.map((u) => u.email) } });
     console.log('🗑️  Cleared existing seed data');
 
-    // Insert experiments
-    await Experiment.insertMany(experiments);
-    console.log(`📐  Seeded ${experiments.length} experiments`);
+    // Insert admin user first so we have an _id for createdBy
+    const adminData = demoUsers.find((u) => u.role === 'admin')!;
+    const adminUser = await new User(adminData).save();
 
-    // Insert users (password hashing handled by pre-save hook)
-    for (const u of demoUsers) {
+    // Insert remaining users
+    for (const u of demoUsers.filter((u) => u.role !== 'admin')) {
       await new User(u).save();
     }
     console.log(`👥  Seeded ${demoUsers.length} demo users`);
+
+    // Insert experiments with createdBy set to admin's _id
+    await Experiment.insertMany(experiments.map((e) => ({ ...e, createdBy: adminUser._id })));
+    console.log(`📐  Seeded ${experiments.length} experiments`);
 
     console.log('\n🎉  Seed complete!');
     console.log('\nDemo credentials:');
